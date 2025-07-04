@@ -1,6 +1,8 @@
 {
   "dependencies": {
+    "@types/date-fns": "^2.5.3",
     "axios": "^1.10.0",
+    "date-fns": "^4.1.0",
     "jwt-decode": "^4.0.0",
     "react-router-dom": "^7.6.3"
   }

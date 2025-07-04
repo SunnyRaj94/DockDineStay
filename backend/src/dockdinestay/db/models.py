@@ -32,7 +32,6 @@ model_config_defaults = ConfigDict(
 
 # ---------- User Schema ----------
 class User(BaseModel):
-    # id: Optional[PyObjectId] = Field(alias="_id", default_factory=PyObjectId)
     id: Optional[PyObjectId] = Field(
         default_factory=PyObjectId,
         validation_alias=AliasChoices("_id", "id"),  # Allow _id or id for input
@@ -104,7 +103,11 @@ class UpdateUser(BaseModel):
 
 # ---------- Hotel Room Schema ----------
 class HotelRoom(BaseModel):
-    id: Optional[PyObjectId] = Field(alias="_id", default_factory=PyObjectId)
+    id: Optional[PyObjectId] = Field(
+        default_factory=PyObjectId,
+        validation_alias=AliasChoices("_id", "id"),  # Allow _id or id for input
+        serialization_alias="id",  # Explicitly force 'id' for output JSON
+    )
     room_number: str = Field(min_length=1, max_length=10)
     type: str = Field(description="e.g., 'Standard', 'Deluxe', 'Suite'")
     price: float = Field(gt=0)

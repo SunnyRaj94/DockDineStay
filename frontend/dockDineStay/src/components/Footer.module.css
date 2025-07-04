@@ -1,0 +1,34 @@
+
+.footer {
+  background-color: #343a40; /* Dark background */
+  color: #f8f9fa; /* Light text */
+  padding: 1.5rem 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+  margin-top: auto; /* Pushes the footer to the bottom if parent is flex column */
+  width: 100%;
+  box-sizing: border-box; /* Include padding in width */
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow at the top */
+}
+
+.footerContent {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footerContent p {
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.footerContent p:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .footer {
+    padding: 1rem 0.5rem;
+    font-size: 0.8rem;
+  }
+}

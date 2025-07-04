@@ -4,6 +4,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "./context/AuthContext";
 
 // Import your pages
+import AdminHotelRoomsPage from "./pages/AdminHotelRoomsPage"; // <--- NEW IMPORT
 import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
 import ManageUsersPage from "./pages/ManageUsersPage";
@@ -11,8 +12,9 @@ import ProfilePage from "./pages/ProfilePage";
 
 // Import the new App.css
 import "./App.css";
-// Make sure src/index.css is also imported in src/main.tsx or here for global styles
-// import './index.css'; // If not already in main.tsx
+
+// Import the new Footer component
+import Footer from "./components/Footer";
 
 function App() {
   const { isAuthenticated, user, logout } = useAuth();
@@ -20,60 +22,45 @@ function App() {
   return (
     <>
       <nav className="navbar">
-        {" "}
-        {/* Use class for navbar */}
         <Link to="/" className="navbar-brand">
-          {" "}
-          {/* Use class for brand */}
           DockDineStay
         </Link>
         <div className="navbar-links">
-          {" "}
-          {/* Use class for links container */}
           {isAuthenticated ? (
             <>
               <span className="navbar-greeting">
-                {" "}
-                {/* Use class for greeting */}
                 Hello, {user?.username} ({user?.role})
               </span>
               <Link to="/dashboard" className="navbar-link">
-                {" "}
-                {/* Use class for links */}
                 Dashboard
               </Link>
               <Link to="/profile" className="navbar-link">
-                {" "}
-                {/* Use class for links */}
                 Profile
               </Link>
+              {/* Show Manage Rooms link only for Admin */}
+              {user?.role === "admin" && (
+                <Link to="/admin/rooms" className="navbar-link">
+                  Manage Rooms
+                </Link>
+              )}
               {/* Show Manage Users link only for Admin */}
               {user?.role === "admin" && (
                 <Link to="/manage-users" className="navbar-link">
-                  {" "}
-                  {/* Use class for links */}
                   Manage Users
                 </Link>
               )}
               <button onClick={logout} className="navbar-button">
-                {" "}
-                {/* Use class for button */}
                 Logout
               </button>
             </>
           ) : (
             <Link to="/login" className="navbar-link">
-              {" "}
-              {/* Use class for links */}
               Login
             </Link>
           )}
         </div>
       </nav>
-
       <div className="app-content-container">
-        {" "}
-        {/* Apply the main content container style */}
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route
@@ -100,12 +87,19 @@ function App() {
               </ProtectedRoute>
             }
           />
+          {/* NEW: Route for AdminHotelRoomsPage */}
+          <Route
+            path="/admin/rooms"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminHotelRoomsPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/unauthorized"
             element={
               <div className="unauthorized-container">
-                {" "}
-                {/* Use class for unauthorized message */}
                 <h3>403 - Unauthorized Access</h3>
                 <p>You do not have permission to view this page.</p>
                 <Link to="/dashboard">Go to Dashboard</Link>
@@ -116,6 +110,7 @@ function App() {
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </div>
+      <Footer /> {/* <--- NEW: Include the Footer component here */}
     </>
   );
 }

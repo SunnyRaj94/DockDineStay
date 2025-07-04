@@ -1,5 +1,3 @@
-/* src/index.css */
-
 /* Global Reset/Base Styles */
 *,
 *::before,
@@ -20,7 +18,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6; /* Improved readability */
   color: #333; /* Darker text for readability */
-  background-color: #f0f2f5; /* A subtle light grey background */
+  background-color: #31507f; /* A subtle light grey background */
   min-height: 100vh; /* Ensure body takes full viewport height */
   display: flex; /* Use flexbox to easily center/manage main content */
   flex-direction: column; /* Stack children vertically */
