@@ -1,5 +1,5 @@
 from dockdinestay.db.users import User, UserCRUD  # noqa
-from dockdinestay.db.utils import db  # noqa
+from dockdinestay.db.utils import db, UserRole  # noqa
 from dockdinestay.db.hotel_room import HotelRoom, HotelRoomCRUD  # noqa
 from dockdinestay.db.hotel_booking import HotelBooking, HotelBookingCRUD  # noqa
 from dockdinestay.db.cafeteria_table_crud import (  # noqa
