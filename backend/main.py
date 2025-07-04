@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, status, Depends
 from typing import List
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 
 from dockdinestay.db import (
@@ -44,6 +45,27 @@ app = FastAPI(
     title="DockDineStay API",
     description="API for managing hotel rooms, bookings, cafeteria services, and boat rentals.",
     version="0.1.0",
+)
+
+
+# --- CORS Configuration ---
+# Define allowed origins (your frontend URLs)
+# In a production environment, you should replace "*" with your actual frontend domain(s)
+origins = [
+    "http://localhost",  # For direct access to localhost
+    "http://localhost:5173",  # Your Vite frontend development server
+    "http://127.0.0.1:5173",  # Another common way localhost is resolved
+    "http://127.0.0.1:8000",  # Allow your backend to access itself if needed, although usually not necessary for CORS
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # List of allowed origins
+    allow_credentials=True,  # Allow cookies to be included in cross-origin HTTP requests
+    allow_methods=[
+        "*"
+    ],  # Allow all HTTP methods (GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH)
+    allow_headers=["*"],  # Allow all HTTP headers
 )
 
 
@@ -105,7 +127,7 @@ async def login_for_access_token(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    if not verify_password(form_data.password, user_in_db.hashed_password):
+    if not verify_password(form_data.password, user_in_db.password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Incorrect username or password",
@@ -132,7 +154,7 @@ async def login_for_access_token(
 )
 async def create_user(user: User, user_crud: UserCRUD = Depends(get_user_crud)):
     # This endpoint is publicly accessible for new user registration
-    user.hashed_password = hash_password(user.hashed_password)
+    user.password = hash_password(user.password)
     created_user = await user_crud.create_user(user)
     return created_user
 
@@ -141,7 +163,7 @@ async def create_user(user: User, user_crud: UserCRUD = Depends(get_user_crud)):
     "/users/",
     response_model=List[User],
     summary="Get all users (Admin Only)",
-    dependencies=[Depends(is_admin)],
+    dependencies=[Depends(JWTBearer()), Depends(is_admin)],
 )
 async def get_all_users(user_crud: UserCRUD = Depends(get_user_crud)):
     users = await user_crud.get_all_users()
@@ -168,7 +190,7 @@ async def get_current_user_profile(
     "/users/{user_id}",
     response_model=User,
     summary="Get a user by ID (Admin Only)",
-    dependencies=[Depends(is_admin)],
+    dependencies=[Depends(JWTBearer()), Depends(is_admin)],
 )
 async def get_user_by_id(user_id: str, user_crud: UserCRUD = Depends(get_user_crud)):
     user = await user_crud.get_user_by_id(user_id)
@@ -181,7 +203,7 @@ async def get_user_by_id(user_id: str, user_crud: UserCRUD = Depends(get_user_cr
     "/users/{user_id}",
     response_model=User,
     summary="Update an existing user (Admin or Self)",
-    dependencies=[Depends(JWTBearer())],
+    dependencies=[Depends(JWTBearer()), Depends(JWTBearer())],
 )
 async def update_user(
     user_id: str,
@@ -200,8 +222,8 @@ async def update_user(
         )
 
     # If password is being updated, hash it
-    if user.hashed_password:
-        user.hashed_password = hash_password(user.hashed_password)
+    if user.password:
+        user.password = hash_password(user.password)
     updated_user = await user_crud.update_user(user_id, user)
     if updated_user:
         return updated_user
@@ -212,7 +234,7 @@ async def update_user(
     "/users/{user_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a user (Admin Only)",
-    dependencies=[Depends(is_admin)],
+    dependencies=[Depends(JWTBearer()), Depends(is_admin)],
 )
 async def delete_user(user_id: str, user_crud: UserCRUD = Depends(get_user_crud)):
     deleted = await user_crud.delete_user(user_id)
@@ -229,7 +251,7 @@ async def delete_user(user_id: str, user_crud: UserCRUD = Depends(get_user_crud)
     response_model=HotelRoom,
     status_code=status.HTTP_201_CREATED,
     summary="Create a new hotel room (Admin Only)",
-    dependencies=[Depends(is_admin)],
+    dependencies=[Depends(JWTBearer()), Depends(is_admin)],
 )
 async def create_hotel_room(
     room: HotelRoom, room_crud: HotelRoomCRUD = Depends(get_hotel_room_crud)
@@ -242,7 +264,7 @@ async def create_hotel_room(
     "/rooms/",
     response_model=List[HotelRoom],
     summary="Get all hotel rooms (Any Authenticated User)",
-    dependencies=[Depends(JWTBearer())],
+    dependencies=[Depends(JWTBearer()), Depends(JWTBearer())],
 )
 async def get_all_hotel_rooms(room_crud: HotelRoomCRUD = Depends(get_hotel_room_crud)):
     rooms = await room_crud.get_all_rooms()
@@ -253,7 +275,7 @@ async def get_all_hotel_rooms(room_crud: HotelRoomCRUD = Depends(get_hotel_room_
     "/rooms/{room_id}",
     response_model=HotelRoom,
     summary="Get a hotel room by ID (Any Authenticated User)",
-    dependencies=[Depends(JWTBearer())],
+    dependencies=[Depends(JWTBearer()), Depends(JWTBearer())],
 )
 async def get_hotel_room_by_id(
     room_id: str, room_crud: HotelRoomCRUD = Depends(get_hotel_room_crud)
@@ -270,7 +292,7 @@ async def get_hotel_room_by_id(
     "/rooms/{room_id}",
     response_model=HotelRoom,
     summary="Update an existing hotel room (Admin Only)",
-    dependencies=[Depends(is_admin)],
+    dependencies=[Depends(JWTBearer()), Depends(is_admin)],
 )
 async def update_hotel_room(
     room_id: str,
@@ -289,7 +311,7 @@ async def update_hotel_room(
     "/rooms/{room_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a hotel room (Admin Only)",
-    dependencies=[Depends(is_admin)],
+    dependencies=[Depends(JWTBearer()), Depends(is_admin)],
 )
 async def delete_hotel_room(
     room_id: str, room_crud: HotelRoomCRUD = Depends(get_hotel_room_crud)
@@ -328,7 +350,7 @@ async def create_hotel_booking(
     "/bookings/",
     response_model=List[HotelBooking],
     summary="Get all hotel bookings (Admin/Staff Only)",
-    dependencies=[Depends(is_staff_or_admin)],
+    dependencies=[Depends(JWTBearer()), Depends(is_staff_or_admin)],
 )
 async def get_all_hotel_bookings(
     booking_crud: HotelBookingCRUD = Depends(get_hotel_booking_crud),
@@ -370,7 +392,7 @@ async def get_hotel_booking_by_id(
     "/bookings/{booking_id}",
     response_model=HotelBooking,
     summary="Update an existing hotel booking (Admin/Staff or Self)",
-    dependencies=[Depends(JWTBearer())],
+    dependencies=[Depends(JWTBearer()), Depends(JWTBearer())],
 )
 async def update_hotel_booking(
     booking_id: str,
@@ -432,7 +454,7 @@ async def update_hotel_booking(
     "/bookings/{booking_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a hotel booking (Admin/Staff Only)",
-    dependencies=[Depends(is_staff_or_admin)],
+    dependencies=[Depends(JWTBearer()), Depends(is_staff_or_admin)],
 )
 async def delete_hotel_booking(
     booking_id: str, booking_crud: HotelBookingCRUD = Depends(get_hotel_booking_crud)
@@ -451,7 +473,7 @@ async def delete_hotel_booking(
     response_model=CafeteriaTable,
     status_code=status.HTTP_201_CREATED,
     summary="Create a new cafeteria table (Admin Only)",
-    dependencies=[Depends(is_admin)],
+    dependencies=[Depends(JWTBearer()), Depends(is_admin)],
 )
 async def create_cafeteria_table(
     table: CafeteriaTable,
@@ -465,7 +487,7 @@ async def create_cafeteria_table(
     "/tables/",
     response_model=List[CafeteriaTable],
     summary="Get all cafeteria tables (Any Authenticated User)",
-    dependencies=[Depends(JWTBearer())],
+    dependencies=[Depends(JWTBearer()), Depends(JWTBearer())],
 )
 async def get_all_cafeteria_tables(
     table_crud: CafeteriaTableCRUD = Depends(get_cafeteria_table_crud),
@@ -478,7 +500,7 @@ async def get_all_cafeteria_tables(
     "/tables/{table_id}",
     response_model=CafeteriaTable,
     summary="Get a cafeteria table by ID (Any Authenticated User)",
-    dependencies=[Depends(JWTBearer())],
+    dependencies=[Depends(JWTBearer()), Depends(JWTBearer())],
 )
 async def get_cafeteria_table_by_id(
     table_id: str, table_crud: CafeteriaTableCRUD = Depends(get_cafeteria_table_crud)
@@ -495,7 +517,7 @@ async def get_cafeteria_table_by_id(
     "/tables/{table_id}",
     response_model=CafeteriaTable,
     summary="Update an existing cafeteria table (Admin/Staff Only)",
-    dependencies=[Depends(is_staff_or_admin)],
+    dependencies=[Depends(JWTBearer()), Depends(is_staff_or_admin)],
 )
 async def update_cafeteria_table(
     table_id: str,
@@ -514,7 +536,7 @@ async def update_cafeteria_table(
     "/tables/{table_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a cafeteria table (Admin Only)",
-    dependencies=[Depends(is_admin)],
+    dependencies=[Depends(JWTBearer()), Depends(is_admin)],
 )
 async def delete_cafeteria_table(
     table_id: str, table_crud: CafeteriaTableCRUD = Depends(get_cafeteria_table_crud)
@@ -533,7 +555,7 @@ async def delete_cafeteria_table(
     response_model=CafeteriaOrderItem,
     status_code=status.HTTP_201_CREATED,
     summary="Create a new cafeteria menu item (Admin Only)",
-    dependencies=[Depends(is_admin)],
+    dependencies=[Depends(JWTBearer()), Depends(is_admin)],
 )
 async def create_cafeteria_order_item(
     item: CafeteriaOrderItem,
@@ -547,7 +569,7 @@ async def create_cafeteria_order_item(
     "/menu-items/",
     response_model=List[CafeteriaOrderItem],
     summary="Get all cafeteria menu items (Any Authenticated User)",
-    dependencies=[Depends(JWTBearer())],
+    dependencies=[Depends(JWTBearer()), Depends(JWTBearer())],
 )
 async def get_all_cafeteria_order_items(
     item_crud: CafeteriaOrderItemCRUD = Depends(get_cafeteria_order_item_crud),
@@ -560,7 +582,7 @@ async def get_all_cafeteria_order_items(
     "/menu-items/{item_id}",
     response_model=CafeteriaOrderItem,
     summary="Get a cafeteria menu item by ID (Any Authenticated User)",
-    dependencies=[Depends(JWTBearer())],
+    dependencies=[Depends(JWTBearer()), Depends(JWTBearer())],
 )
 async def get_cafeteria_order_item_by_id(
     item_id: str,
@@ -578,7 +600,7 @@ async def get_cafeteria_order_item_by_id(
     "/menu-items/{item_id}",
     response_model=CafeteriaOrderItem,
     summary="Update an existing cafeteria menu item (Admin Only)",
-    dependencies=[Depends(is_admin)],
+    dependencies=[Depends(JWTBearer()), Depends(is_admin)],
 )
 async def update_cafeteria_order_item(
     item_id: str,
@@ -597,7 +619,7 @@ async def update_cafeteria_order_item(
     "/menu-items/{item_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a cafeteria menu item (Admin Only)",
-    dependencies=[Depends(is_admin)],
+    dependencies=[Depends(JWTBearer()), Depends(is_admin)],
 )
 async def delete_cafeteria_order_item(
     item_id: str,
@@ -638,7 +660,7 @@ async def create_cafeteria_order(
     "/orders/",
     response_model=List[CafeteriaOrder],
     summary="Get all cafeteria orders (Admin/Staff Only)",
-    dependencies=[Depends(is_staff_or_admin)],
+    dependencies=[Depends(JWTBearer()), Depends(is_staff_or_admin)],
 )
 async def get_all_cafeteria_orders(
     order_crud: CafeteriaOrderCRUD = Depends(get_cafeteria_order_crud),
@@ -680,7 +702,7 @@ async def get_cafeteria_order_by_id(
     "/orders/{order_id}",
     response_model=CafeteriaOrder,
     summary="Update an existing cafeteria order (Admin/Staff or Self)",
-    dependencies=[Depends(JWTBearer())],
+    dependencies=[Depends(JWTBearer()), Depends(JWTBearer())],
 )
 async def update_cafeteria_order(
     order_id: str,
@@ -728,7 +750,7 @@ async def update_cafeteria_order(
     "/orders/{order_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a cafeteria order (Admin/Staff Only)",
-    dependencies=[Depends(is_staff_or_admin)],
+    dependencies=[Depends(JWTBearer()), Depends(is_staff_or_admin)],
 )
 async def delete_cafeteria_order(
     order_id: str, order_crud: CafeteriaOrderCRUD = Depends(get_cafeteria_order_crud)
@@ -747,7 +769,7 @@ async def delete_cafeteria_order(
     response_model=Boat,
     status_code=status.HTTP_201_CREATED,
     summary="Create a new boat (Admin Only)",
-    dependencies=[Depends(is_admin)],
+    dependencies=[Depends(JWTBearer()), Depends(is_admin)],
 )
 async def create_boat(boat: Boat, boat_crud: BoatCRUD = Depends(get_boat_crud)):
     created_boat = await boat_crud.create_boat(boat)
@@ -758,7 +780,7 @@ async def create_boat(boat: Boat, boat_crud: BoatCRUD = Depends(get_boat_crud)):
     "/boats/",
     response_model=List[Boat],
     summary="Get all boats (Any Authenticated User)",
-    dependencies=[Depends(JWTBearer())],
+    dependencies=[Depends(JWTBearer()), Depends(JWTBearer())],
 )
 async def get_all_boats(boat_crud: BoatCRUD = Depends(get_boat_crud)):
     boats = await boat_crud.get_all_boats()
@@ -769,7 +791,7 @@ async def get_all_boats(boat_crud: BoatCRUD = Depends(get_boat_crud)):
     "/boats/{boat_id}",
     response_model=Boat,
     summary="Get a boat by ID (Any Authenticated User)",
-    dependencies=[Depends(JWTBearer())],
+    dependencies=[Depends(JWTBearer()), Depends(JWTBearer())],
 )
 async def get_boat_by_id(boat_id: str, boat_crud: BoatCRUD = Depends(get_boat_crud)):
     boat = await boat_crud.get_boat_by_id(boat_id)
@@ -782,7 +804,7 @@ async def get_boat_by_id(boat_id: str, boat_crud: BoatCRUD = Depends(get_boat_cr
     "/boats/{boat_id}",
     response_model=Boat,
     summary="Update an existing boat (Admin Only)",
-    dependencies=[Depends(is_admin)],
+    dependencies=[Depends(JWTBearer()), Depends(is_admin)],
 )
 async def update_boat(
     boat_id: str, boat: Boat, boat_crud: BoatCRUD = Depends(get_boat_crud)
@@ -797,7 +819,7 @@ async def update_boat(
     "/boats/{boat_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a boat (Admin Only)",
-    dependencies=[Depends(is_admin)],
+    dependencies=[Depends(JWTBearer()), Depends(is_admin)],
 )
 async def delete_boat(boat_id: str, boat_crud: BoatCRUD = Depends(get_boat_crud)):
     deleted = await boat_crud.delete_boat(boat_id)
@@ -834,7 +856,7 @@ async def create_boat_booking(
     "/boat-bookings/",
     response_model=List[BoatBooking],
     summary="Get all boat bookings (Admin/Staff Only)",
-    dependencies=[Depends(is_staff_or_admin)],
+    dependencies=[Depends(JWTBearer()), Depends(is_staff_or_admin)],
 )
 async def get_all_boat_bookings(
     booking_crud: BoatBookingCRUD = Depends(get_boat_booking_crud),
@@ -876,7 +898,7 @@ async def get_boat_booking_by_id(
     "/boat-bookings/{booking_id}",
     response_model=BoatBooking,
     summary="Update an existing boat booking (Admin/Staff or Self)",
-    dependencies=[Depends(JWTBearer())],
+    dependencies=[Depends(JWTBearer()), Depends(JWTBearer())],
 )
 async def update_boat_booking(
     booking_id: str,
@@ -936,7 +958,7 @@ async def update_boat_booking(
     "/boat-bookings/{booking_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a boat booking (Admin/Staff Only)",
-    dependencies=[Depends(is_staff_or_admin)],
+    dependencies=[Depends(JWTBearer()), Depends(is_staff_or_admin)],
 )
 async def delete_boat_booking(
     booking_id: str, booking_crud: BoatBookingCRUD = Depends(get_boat_booking_crud)

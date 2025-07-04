@@ -1,17 +1,15 @@
-# backend/auth/auth_utils.py
-
 from fastapi import Depends, HTTPException, status, Request
 from typing import List, Union
 
 from dockdinestay.db.utils import UserRole  # Import your UserRole enum
-from dockdinestay.auth.auth_bearer import (
-    JWTBearer,
-)  # We need JWTBearer to get the payload
+# from dockdinestay.auth.auth_bearer import (
+#     JWTBearer,
+# )  # We need JWTBearer to get the payload
 
 
-# Dependency to get the current user's payload from the token
-# This depends on JWTBearer being executed first, which stores the payload in request.state
-def get_current_user_payload(request: Request = Depends(JWTBearer())) -> dict:
+def get_current_user_payload(
+    request: Request,
+) -> dict:  # <-- REMOVED Depends(JWTBearer()) here
     """
     Retrieves the decoded user payload from the request state,
     which was set by the JWTBearer dependency.
@@ -70,6 +68,9 @@ def has_role(required_roles: Union[UserRole, List[UserRole]]):
     if not isinstance(required_roles, list):
         required_roles = [required_roles]
 
+    # The _has_role function itself doesn't need JWTBearer directly,
+    # it relies on get_current_user_role which in turn relies on get_current_user_payload.
+    # The JWTBearer dependency must be applied at the route level for these to work.
     async def _has_role(current_user_role: UserRole = Depends(get_current_user_role)):
         if current_user_role not in required_roles:
             raise HTTPException(
@@ -87,4 +88,3 @@ is_staff_or_admin = has_role([UserRole.BACK_DESK, UserRole.ADMIN])
 is_guest_or_staff_or_admin = has_role(
     [UserRole.BACK_DESK, UserRole.FRONT_DESK, UserRole.ADMIN]
 )
-# You can add more specific ones as needed, e.g., is_guest
