@@ -1,0 +1,72 @@
+{
+  // Format files on save
+  "editor.formatOnSave": true,
+  
+  // Use Prettier as the default formatter
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  // Format only modified lines (optional, useful for teams)
+  "editor.formatOnSaveMode": "modifications",
+
+  // Enable code actions like organizing imports
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit",
+    "source.fixAll": "explicit"
+  },
+
+  // Tab and indentation settings
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+
+  // Enable JavaScript/TypeScript validation
+  "javascript.validate.enable": true,
+  "typescript.validate.enable": true,
+
+  // ESLint integration
+  "eslint.enable": true,
+  "eslint.format.enable": true,
+  "eslint.alwaysShowStatus": true,
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+
+  // React JSX formatting
+  "files.associations": {
+    "*.js": "javascriptreact"
+  },
+
+  // Optional: auto-detect line endings (good across team members on different OS)
+  "files.eol": "\n",
+
+  // Use the system shell on macOS
+  "terminal.integrated.defaultProfile.osx": "zsh",
+
+  // Optional: Enable snippet suggestions on top
+  "editor.snippetSuggestions": "top",
+  "[html]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "vscode.html-language-features"
+  },
+  "html.format.enable": true,
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
+  "flake8.enabled": true,
+  "flake8.args": [
+    "--max-line-length=88",
+    "--ignore=E203, E501, W503" // Example: Ignoring specific Flake8 errors/warnings
+  ],
+  "python.defaultInterpreterPath": "/Users/sunnyraj/miniconda3/envs/rag_app/",
+  "explorer.confirmDelete": false,
+  "workbench.editor.empty.hint": "hidden",
+  "workbench.editor.enablePreview": false,
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+
+  
+}
