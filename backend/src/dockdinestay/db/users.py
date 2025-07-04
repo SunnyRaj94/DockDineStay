@@ -5,7 +5,7 @@ from pymongo import AsyncMongoClient
 
 from dockdinestay.db.utils import default_time
 
-from dockdinestay.db.models import User, UserRole
+from dockdinestay.db.models import User, UserRole, UpdateUser
 
 
 class UserCRUD:
@@ -54,7 +54,9 @@ class UserCRUD:
 
         # Set default role, created_at, updated_at if not provided
         if not user_data.role:
-            user_data.role = UserRole.guest  # Default role
+            user_data.role = (
+                UserRole.customer
+            )  # Changed from guest as per common usage, but keep if you use guest
         if not user_data.created_at:
             user_data.created_at = default_time()
         if not user_data.updated_at:
@@ -98,7 +100,7 @@ class UserCRUD:
             return await self._process_user_doc(user_doc)
         return None
 
-    # --- NEW METHOD: Get user by username ---
+    # --- EXISTING METHOD: Get user by username ---
     async def get_user_by_username(self, username: str) -> Optional[User]:
         """
         Retrieves a single user by their username (case-insensitive).
@@ -110,11 +112,13 @@ class UserCRUD:
             return await self._process_user_doc(user_doc)
         return None
 
-    # --- END NEW METHOD ---
-
-    async def update_user(self, user_id: str, user_data: User) -> Optional[User]:
+    # --- MODIFIED: update_user to accept UpdateUser model ---
+    async def update_user(
+        self, user_id: str, user_data: UpdateUser
+    ) -> Optional[User]:  # <-- CHANGED TYPE HINT TO UpdateUser
         """
         Updates an existing user's information.
+        Accepts UpdateUser schema for partial updates.
         """
         if not ObjectId.is_valid(user_id):
             raise HTTPException(
@@ -122,54 +126,73 @@ class UserCRUD:
                 detail="Invalid ObjectId format",
             )
 
-        update_data = user_data.model_dump(by_alias=True, exclude_unset=True)
-        update_data.pop("_id", None)  # Ensure _id is not updated
-        update_data.pop("id", None)  # Ensure 'id' is not updated
+        # Get the existing user document to check for unique constraints against
+        existing_user_doc = await self.collection.find_one({"_id": ObjectId(user_id)})
+        if not existing_user_doc:
+            return None  # User not found
 
-        # Prevent changing username or email to an existing one (if in update_data)
+        # Use model_dump(exclude_unset=True) to get only the fields that were provided in the request
+        update_data = user_data.model_dump(by_alias=True, exclude_unset=True)
+
+        # Remove _id and id if they somehow got into update_data (Pydantic models generally prevent this for incoming data)
+        update_data.pop("_id", None)
+        update_data.pop("id", None)
+
+        # Handle unique constraints for username and email ONLY IF THEY ARE PROVIDED IN THE UPDATE
         if "username" in update_data:
-            existing_user = await self.collection.find_one(
+            # Check if username already exists for *another* user
+            if await self.collection.find_one(
                 {
                     "username": {
                         "$regex": f"^{update_data['username']}$",
                         "$options": "i",
                     },
-                    "_id": {"$ne": ObjectId(user_id)},
+                    "_id": {
+                        "$ne": ObjectId(user_id)
+                    },  # Ensure it's not the current user's own username
                 }
-            )
-            if existing_user:
+            ):
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=f"User with username '{update_data['username']}' already exists.",
                 )
         if "email" in update_data:
-            existing_user = await self.collection.find_one(
+            # Check if email already exists for *another* user
+            if await self.collection.find_one(
                 {
                     "email": {"$regex": f"^{update_data['email']}$", "$options": "i"},
-                    "_id": {"$ne": ObjectId(user_id)},
+                    "_id": {
+                        "$ne": ObjectId(user_id)
+                    },  # Ensure it's not the current user's own email
                 }
-            )
-            if existing_user:
+            ):
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=f"User with email '{update_data['email']}' already exists.",
                 )
 
-        # Update updated_at timestamp
+        # Update updated_at timestamp (always update on any change)
         update_data["updated_at"] = default_time()
+
+        # If no actual fields were provided for update (apart from potentially 'updated_at' if we added it earlier),
+        # then there's nothing to change. This can happen if frontend sends an empty body.
+        # Check if update_data has any keys other than 'updated_at' if 'updated_at' is always added.
+        if not update_data or (len(update_data) == 1 and "updated_at" in update_data):
+            raise HTTPException(
+                status_code=status.HTTP_304_NOT_MODIFIED,
+                detail="No valid fields provided for update or no changes detected.",
+            )
 
         result = await self.collection.update_one(
             {"_id": ObjectId(user_id)}, {"$set": update_data}
         )
 
         if result.modified_count == 0:
-            # Check if the document truly doesn't exist
-            if not await self.collection.find_one({"_id": ObjectId(user_id)}):
-                return None  # User not found
-            # If it exists but wasn't modified, return 304
+            # If the user existed but no fields were actually modified by MongoDB (because data was identical)
+            # and we sent some valid fields (checked by the 'if not update_data' above)
             raise HTTPException(
                 status_code=status.HTTP_304_NOT_MODIFIED,
-                detail="User data not modified",
+                detail="User data not modified (data sent was identical to existing data).",
             )
 
         updated_user_doc = await self.collection.find_one({"_id": ObjectId(user_id)})
@@ -178,7 +201,7 @@ class UserCRUD:
 
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve updated user",
+            detail="Failed to retrieve updated user after modification.",
         )
 
     async def delete_user(self, user_id: str) -> bool:

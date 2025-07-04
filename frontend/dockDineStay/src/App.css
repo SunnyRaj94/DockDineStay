@@ -1,52 +1,140 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+/* src/App.css */
+
+/* --- Navbar Styles --- */
+.navbar {
+  padding: 10px 20px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+}
+
+.navbar-brand {
+  font-weight: bold;
+  font-size: 1.2em;
+  color: #343a40; /* Darker color for brand */
+  text-decoration: none; /* In case it's a Link */
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap; /* Allow links to wrap */
+  gap: 15px; /* Space between links/buttons */
+}
+
+.navbar-greeting {
+  margin-right: 15px;
+  color: #555;
+  white-space: nowrap; /* Prevent text from wrapping prematurely */
+}
+
+.navbar-link {
+  text-decoration: none;
+  color: #007bff;
+  transition: color 0.2s ease, transform 0.1s ease;
+}
+
+.navbar-link:hover {
+  color: #0056b3;
+  transform: translateY(-1px);
+}
+
+.navbar-button {
+  background: none;
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  font-size: 1em;
+  transition: color 0.2s ease, transform 0.1s ease;
+}
+
+.navbar-button:hover {
+  color: #a71d2a;
+  transform: translateY(-1px);
+}
+
+/* --- Main Content Container --- */
+.app-content-container {
+  max-width: 1200px; /* Max width for larger screens */
+  margin: 20px auto; /* Center the container with some vertical margin */
+  padding: 1rem; /* Add some padding around the content */
+  width: 100%; /* Occupy full width on smaller screens */
+  box-sizing: border-box; /* Ensure padding doesn't add to total width */
+  flex-grow: 1; /* Allow content to grow if App is flex column */
+  display: flex; /* Make content itself a flex container */
+  flex-direction: column; /* Stack routes vertically */
+  min-height: calc(100vh - 70px); /* Adjust based on navbar height, ensures footer is at bottom */
+}
+
+
+/* --- Unauthorized Page Styles --- */
+.unauthorized-container {
   text-align: center;
+  margin-top: 50px;
+  padding: 20px;
+  background-color: #fff3cd; /* Light warning yellow */
+  border: 1px solid #ffeeba;
+  border-radius: 8px;
+  color: #856404; /* Darker yellow text */
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-:root {
-  --border-color: #ccc;
-  --border-light: #eee;
-  --error-color: red;
-  --primary-color: #007bff;
-  --success-color: #28a745;
-  --danger-color: #dc3545;
-  --table-header-bg: #f2f2f2;
+.unauthorized-container h3 {
+  color: #dc3545; /* Red for error code */
+  margin-bottom: 15px;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.unauthorized-container p {
+  margin-bottom: 20px;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+.unauthorized-container a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.unauthorized-container a:hover {
+  text-decoration: underline;
+}
+
+/* --- Responsive Adjustments for Navbar --- */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column; /* Stack navbar items vertically */
+    align-items: flex-start; /* Align items to the start */
+    padding: 10px;
   }
-  to {
-    transform: rotate(360deg);
+
+  .navbar-brand {
+    margin-bottom: 10px;
+  }
+
+  .navbar-links {
+    flex-direction: column; /* Stack links vertically */
+    align-items: flex-start;
+    gap: 10px; /* Reduce gap */
+    width: 100%; /* Make links take full width */
+  }
+
+  .navbar-greeting {
+    margin-right: 0; /* Remove right margin */
+    margin-bottom: 5px; /* Add some bottom margin */
+  }
+
+  .navbar-link,
+  .navbar-button {
+    width: 100%; /* Make links/buttons full width */
+    text-align: left; /* Align text left */
+    padding: 5px 0; /* Add vertical padding for touch targets */
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
+/* Ensure global `body` and `#root` styles are in `index.css` */
+/* And that `index.css` is imported first in `main.tsx` or `App.tsx` */

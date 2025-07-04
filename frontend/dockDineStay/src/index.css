@@ -1,68 +1,133 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+/* src/index.css */
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* Global Reset/Base Styles */
+*,
+*::before,
+*::after {
+  box-sizing: border-box; /* Makes padding and border included in the element's total width and height */
+  margin: 0;
+  padding: 0;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+html {
+  font-size: 16px; /* Base font size for rem units */
+  -webkit-text-size-adjust: 100%; /* Prevent text zoom on orientation change */
 }
 
 body {
-  margin: 0;
+  font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6; /* Improved readability */
+  color: #333; /* Darker text for readability */
+  background-color: #f0f2f5; /* A subtle light grey background */
+  min-height: 100vh; /* Ensure body takes full viewport height */
+  display: flex; /* Use flexbox to easily center/manage main content */
+  flex-direction: column; /* Stack children vertically */
+}
+
+#root {
+  flex-grow: 1; /* Allow the React root to take up available space */
   display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  flex-direction: column;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+
+/* General Container/Layout Styles */
+.app-container {
+  max-width: 1200px; /* Max width for larger screens */
+  margin: 0 auto; /* Center the container */
+  padding: 1rem; /* Add some padding around the content */
+  width: 100%; /* Occupy full width on smaller screens */
+  box-sizing: border-box; /* Ensure padding doesn't add to total width */
+  flex-grow: 1; /* Allow content to grow */
+  display: flex;
+  flex-direction: column;
 }
 
+/* Basic Button Styles (if not already defined in a common component) */
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  font-size: 1rem;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  margin: 0.5rem;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+button.primary {
+  background-color: #007bff;
+  color: white;
+}
+
+button.primary:hover {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+}
+
+button.secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+button.secondary:hover {
+  background-color: #545b62;
+  transform: translateY(-1px);
+}
+
+/* Form element styles */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box; /* Include padding in width */
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 768px) {
+  body {
+    font-size: 0.9rem; /* Slightly smaller text on smaller screens */
   }
-  a:hover {
-    color: #747bff;
+
+  .app-container {
+    padding: 0.5rem; /* Less padding on smaller screens */
   }
+
   button {
-    background-color: #f9f9f9;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Further adjustments for very small screens */
+  .button-group {
+    flex-direction: column; /* Stack buttons vertically */
+    align-items: stretch; /* Stretch them to full width */
+  }
+
+  button {
+    width: 100%; /* Full width buttons */
+    margin: 0.5rem 0; /* Add vertical margin */
   }
 }

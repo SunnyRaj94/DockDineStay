@@ -79,6 +79,29 @@ class User(BaseModel):
         return cleaned
 
 
+# --- Schema for updating a user ---
+class UpdateUser(BaseModel):
+    """
+    Schema for updating user information. All fields are optional.
+    """
+
+    username: Optional[str] = Field(None, min_length=3, max_length=50)
+    email: Optional[EmailStr] = None
+    # Password should generally be updated via a dedicated endpoint,
+    # but if handled by this, it must be Optional.
+    password: Optional[str] = None
+    name: Optional[str] = Field(None, max_length=100)
+    role: Optional[UserRole] = None
+    phone: Optional[str] = Field(None, max_length=20)
+    profile_pic: Optional[str] = None
+    is_active: Optional[bool] = None
+
+    class Config:
+        populate_by_name = True
+        json_encoders = {ObjectId: str}
+        arbitrary_types_allowed = True
+
+
 # ---------- Hotel Room Schema ----------
 class HotelRoom(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id", default_factory=PyObjectId)

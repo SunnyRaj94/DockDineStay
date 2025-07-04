@@ -1,137 +1,121 @@
+// src/App.tsx
 import { Link, Navigate, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "./context/AuthContext";
+
+// Import your pages
 import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
 import ManageUsersPage from "./pages/ManageUsersPage";
-import ProfilePage from "./pages/ProfilePage"; // <--- Import ProfilePage
+import ProfilePage from "./pages/ProfilePage";
+
+// Import the new App.css
+import "./App.css";
+// Make sure src/index.css is also imported in src/main.tsx or here for global styles
+// import './index.css'; // If not already in main.tsx
 
 function App() {
   const { isAuthenticated, user, logout } = useAuth();
 
   return (
     <>
-      <nav
-        style={{
-          padding: "10px 20px",
-          backgroundColor: "#f8f9fa",
-          borderBottom: "1px solid #e9ecef",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <div style={{ fontWeight: "bold", fontSize: "1.2em" }}>
+      <nav className="navbar">
+        {" "}
+        {/* Use class for navbar */}
+        <Link to="/" className="navbar-brand">
+          {" "}
+          {/* Use class for brand */}
           DockDineStay
-        </div>
-        <div>
+        </Link>
+        <div className="navbar-links">
+          {" "}
+          {/* Use class for links container */}
           {isAuthenticated ? (
             <>
-              <span style={{ marginRight: "15px" }}>
+              <span className="navbar-greeting">
+                {" "}
+                {/* Use class for greeting */}
                 Hello, {user?.username} ({user?.role})
               </span>
-              <Link
-                to="/dashboard"
-                style={{
-                  marginRight: "15px",
-                  textDecoration: "none",
-                  color: "#007bff",
-                }}
-              >
+              <Link to="/dashboard" className="navbar-link">
+                {" "}
+                {/* Use class for links */}
                 Dashboard
               </Link>
-              {/* NEW: Link to Profile Page */}
-              <Link
-                to="/profile"
-                style={{
-                  marginRight: "15px",
-                  textDecoration: "none",
-                  color: "#007bff",
-                }}
-              >
+              <Link to="/profile" className="navbar-link">
+                {" "}
+                {/* Use class for links */}
                 Profile
               </Link>
               {/* Show Manage Users link only for Admin */}
               {user?.role === "admin" && (
-                <Link
-                  to="/manage-users"
-                  style={{
-                    marginRight: "15px",
-                    textDecoration: "none",
-                    color: "#007bff",
-                  }}
-                >
+                <Link to="/manage-users" className="navbar-link">
+                  {" "}
+                  {/* Use class for links */}
                   Manage Users
                 </Link>
               )}
-              <button
-                onClick={logout}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#dc3545",
-                  cursor: "pointer",
-                  fontSize: "1em",
-                }}
-              >
+              <button onClick={logout} className="navbar-button">
+                {" "}
+                {/* Use class for button */}
                 Logout
               </button>
             </>
           ) : (
-            <Link
-              to="/login"
-              style={{ textDecoration: "none", color: "#007bff" }}
-            >
+            <Link to="/login" className="navbar-link">
+              {" "}
+              {/* Use class for links */}
               Login
             </Link>
           )}
         </div>
       </nav>
 
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        {/* Route for ProfilePage, protected for any authenticated user */}
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <ProfilePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <DashboardPage />
-            </ProtectedRoute>
-          }
-        />
-        {/* Add the protected route for ManageUsersPage */}
-        <Route
-          path="/manage-users"
-          element={
-            <ProtectedRoute allowedRoles={["admin"]}>
-              <ManageUsersPage />
-            </ProtectedRoute>
-          }
-        />
-        {/* Placeholder for unauthorized access */}
-        <Route
-          path="/unauthorized"
-          element={
-            <div
-              style={{ textAlign: "center", marginTop: "50px", color: "red" }}
-            >
-              <h3>403 - Unauthorized Access</h3>
-              <p>You do not have permission to view this page.</p>
-              <Link to="/dashboard">Go to Dashboard</Link>
-            </div>
-          }
-        />
-        {/* Default redirect to login if no other path matches */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
+      <div className="app-content-container">
+        {" "}
+        {/* Apply the main content container style */}
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manage-users"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <ManageUsersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/unauthorized"
+            element={
+              <div className="unauthorized-container">
+                {" "}
+                {/* Use class for unauthorized message */}
+                <h3>403 - Unauthorized Access</h3>
+                <p>You do not have permission to view this page.</p>
+                <Link to="/dashboard">Go to Dashboard</Link>
+              </div>
+            }
+          />
+          {/* Default redirect to login if no other path matches */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </div>
     </>
   );
 }

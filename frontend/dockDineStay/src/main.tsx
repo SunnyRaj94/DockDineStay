@@ -7,6 +7,7 @@ import App from "./App.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx"; // Import AuthProvider
 import "./index.css"; // Keep your global CSS if any
 
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
