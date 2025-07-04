@@ -36,6 +36,8 @@ class HotelBookingStatus(str, Enum):
     CHECKED_IN = "checked-in"
     CHECKED_OUT = "checked-out"
     CANCELLED = "cancelled"
+    PENDING = "pending"
+    CHECKED_OUT_UNPAID = "checked-out-unpaid"
 
 
 class CafeteriaTableStatus(str, Enum):
