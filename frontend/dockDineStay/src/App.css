@@ -5,6 +5,16 @@
   text-align: center;
 }
 
+:root {
+  --border-color: #ccc;
+  --border-light: #eee;
+  --error-color: red;
+  --primary-color: #007bff;
+  --success-color: #28a745;
+  --danger-color: #dc3545;
+  --table-header-bg: #f2f2f2;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;

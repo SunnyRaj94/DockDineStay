@@ -1,5 +1,7 @@
 from fastapi import FastAPI, HTTPException, status, Depends
 from typing import List
+from bson import ObjectId
+from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -45,6 +47,14 @@ app = FastAPI(
     title="DockDineStay API",
     description="API for managing hotel rooms, bookings, cafeteria services, and boat rentals.",
     version="0.1.0",
+    json_encoders={ObjectId: str},
+    openapi_extra={
+        "components": {
+            "schemas": {
+                "User": {"properties": {"id": {"type": "string", "format": "objectid"}}}
+            }
+        }
+    },
 )
 
 
@@ -167,7 +177,7 @@ async def create_user(user: User, user_crud: UserCRUD = Depends(get_user_crud)):
 )
 async def get_all_users(user_crud: UserCRUD = Depends(get_user_crud)):
     users = await user_crud.get_all_users()
-    return users
+    return jsonable_encoder(users, by_alias=False)
 
 
 @app.get(

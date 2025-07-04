@@ -14,7 +14,5 @@ from dockdinestay.db.cafeteria_order_crud import (  # noqa
     CafeteriaOrder,
     CafeteriaOrderCRUD,
 )  # noqa
-
-
 from dockdinestay.db.boat_crud import BoatCRUD, Boat  # noqa
 from dockdinestay.db.boat_booking_crud import BoatBookingCRUD, BoatBooking  # noqa

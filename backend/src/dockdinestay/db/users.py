@@ -23,7 +23,7 @@ class UserCRUD:
         """
         if user_doc and "_id" in user_doc and isinstance(user_doc["_id"], ObjectId):
             user_doc["id"] = str(user_doc["_id"])
-            del user_doc["_id"]
+            user_doc["_id"] = str(user_doc["_id"])
         return User.model_validate(user_doc)
 
     async def create_user(self, user_data: User) -> User:

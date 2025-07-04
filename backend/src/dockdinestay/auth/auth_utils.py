@@ -2,20 +2,26 @@ from fastapi import Depends, HTTPException, status, Request
 from typing import List, Union
 
 from dockdinestay.db.utils import UserRole  # Import your UserRole enum
-# from dockdinestay.auth.auth_bearer import (
-#     JWTBearer,
-# )  # We need JWTBearer to get the payload
+from dockdinestay.auth.auth_bearer import (
+    JWTBearer,
+)  # We need JWTBearer to get the payload
 
 
 def get_current_user_payload(
     request: Request,
-) -> dict:  # <-- REMOVED Depends(JWTBearer()) here
+    # <-- CRUCIAL: JWTBearer() MUST be a dependency here!
+    # It extracts and validates the token, and sets request.state.user_payload
+    token_data: str = Depends(JWTBearer()),
+) -> dict:
     """
     Retrieves the decoded user payload from the request state,
     which was set by the JWTBearer dependency.
     """
+    # Now, request.state.user_payload should be populated by JWTBearer
     payload = request.state.user_payload
     if not payload:
+        # This check might be redundant if JWTBearer ensures payload is set or raises
+        # but it's harmless to keep as a safeguard.
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials: Payload missing.",
@@ -24,13 +30,15 @@ def get_current_user_payload(
     return payload
 
 
-def get_current_user_id(payload: dict = Depends(get_current_user_payload)) -> str:
-    """Retrieves the user_id from the current user's JWT payload."""
+# And your get_current_user_id (if it depends on get_current_user_payload)
+def get_current_user_id(
+    payload: dict = Depends(get_current_user_payload),  # This is correct
+) -> str:
     user_id = payload.get("user_id")
     if not user_id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials: User ID missing in token.",
+            detail="Invalid token: User ID missing from payload.",
             headers={"WWW-Authenticate": "Bearer"},
         )
     return user_id

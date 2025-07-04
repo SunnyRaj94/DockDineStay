@@ -5,6 +5,7 @@ from pydantic import (
     EmailStr,
     field_validator,
     ValidationInfo,
+    AliasChoices,
 )
 
 from dockdinestay.db.utils import (
@@ -16,26 +17,27 @@ from dockdinestay.db.utils import (
     HotelRoomStatus,
     UserRole,
     BoatBookingStatus,
-    BoatStatus
+    BoatStatus,
+    ObjectId,
 )
 from typing import List, Optional
 from datetime import datetime
-from bson import ObjectId
 
 model_config_defaults = ConfigDict(
     populate_by_name=True,
     arbitrary_types_allowed=True,
-    json_encoders={
-        ObjectId: str
-    },  # Deprecated in Pydantic v2, but good for backward compatibility or direct use
     from_attributes=True,  # Enable ORM mode for seamless conversion
 )
 
 
 # ---------- User Schema ----------
 class User(BaseModel):
-    # For _id, if not provided, a new PyObjectId (which is an ObjectId) is generated
-    id: Optional[PyObjectId] = Field(alias="_id", default_factory=PyObjectId)
+    # id: Optional[PyObjectId] = Field(alias="_id", default_factory=PyObjectId)
+    id: Optional[PyObjectId] = Field(
+        default_factory=PyObjectId,
+        validation_alias=AliasChoices("_id", "id"),  # Allow _id or id for input
+        serialization_alias="id",  # Explicitly force 'id' for output JSON
+    )
     username: str = Field(min_length=3, max_length=50)
     email: Optional[EmailStr] = None  # Pydantic's built-in email validation
     password: str  # This will store the hashed password
@@ -50,6 +52,7 @@ class User(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,  # Allows creation with field names or aliases
         arbitrary_types_allowed=True,  # Required for custom types like PyObjectId
+        json_encoders={ObjectId: str, PyObjectId: str},  # Explicitly include PyObjectId
         json_schema_extra={
             "example": {
                 "username": "testuser",
@@ -74,10 +77,6 @@ class User(BaseModel):
         if not cleaned.startswith("+") and not cleaned.isdigit():
             raise ValueError("Phone number must contain only digits or start with +")
         return cleaned
-        # # Simple example: ensure all digits, no special chars
-        # if not v.isdigit():
-        #     raise ValueError("Phone number must contain only digits")
-        # return v
 
 
 # ---------- Hotel Room Schema ----------

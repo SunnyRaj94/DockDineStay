@@ -3,6 +3,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "./context/AuthContext";
 import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
+import ManageUsersPage from "./pages/ManageUsersPage";
+import ProfilePage from "./pages/ProfilePage"; // <--- Import ProfilePage
 
 function App() {
   const { isAuthenticated, user, logout } = useAuth();
@@ -38,6 +40,30 @@ function App() {
               >
                 Dashboard
               </Link>
+              {/* NEW: Link to Profile Page */}
+              <Link
+                to="/profile"
+                style={{
+                  marginRight: "15px",
+                  textDecoration: "none",
+                  color: "#007bff",
+                }}
+              >
+                Profile
+              </Link>
+              {/* Show Manage Users link only for Admin */}
+              {user?.role === "admin" && (
+                <Link
+                  to="/manage-users"
+                  style={{
+                    marginRight: "15px",
+                    textDecoration: "none",
+                    color: "#007bff",
+                  }}
+                >
+                  Manage Users
+                </Link>
+              )}
               <button
                 onClick={logout}
                 style={{
@@ -64,11 +90,29 @@ function App() {
 
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        {/* Route for ProfilePage, protected for any authenticated user */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/dashboard"
           element={
             <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        {/* Add the protected route for ManageUsersPage */}
+        <Route
+          path="/manage-users"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <ManageUsersPage />
             </ProtectedRoute>
           }
         />
