@@ -55,7 +55,6 @@ echo "Installing frontend dependencies (npm install)..."
 npm install
 
 echo "Starting React development server (npm run dev)..."
-cd dockdinestay
 npm run dev
 
 echo ""
@@ -63,3 +62,7 @@ echo "--- Development Environment Setup Complete ---"
 echo "Backend Uvicorn server is running in the background (PID: $UVICORN_PID)."
 echo "Frontend React development server is now running."
 echo "If you need to stop the Uvicorn backend, use: kill $UVICORN_PID"
+
+# Adjust the number of workers based on your Render plan and app needs
+# This assumes your FastAPI app is named 'app' in 'main.py'
+# exec gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app
