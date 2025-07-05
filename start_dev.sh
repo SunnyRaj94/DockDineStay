@@ -36,7 +36,7 @@ cd ..
 echo ""
 echo "--- Setting up Frontend ---"
 echo "Navigating to dockdinestay (frontend) directory..."
-cd dockdinestay
+cd frontend/dockdinestay
 
 echo "Verifying Node.js and npm installation..."
 if ! command -v node &> /dev/null
