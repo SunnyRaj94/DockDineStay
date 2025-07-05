@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Enhanced production-ready deployment script for DockDineStay
+# Complete production deployment script for DockDineStay with comprehensive error handling
 
 # Exit immediately if a command fails
 set -e
@@ -83,15 +83,22 @@ echo "📦 Ensuring correct package versions..."
 npm install --save-exact \
     react-router-dom@6.14.2 \
     jwt-decode@3.1.2 \
-    vite@4.4.9
+    vite@4.4.9 \
+    axios@1.5.0
 
 # Fix jwt-decode import issue
 echo "🔄 Fixing jwt-decode import..."
 sed -i "s/import { jwtDecode } from \"jwt-decode\"/import jwtDecode from \"jwt-decode\"/g" src/context/AuthContext.tsx
 
-# Production build
+# Fix axios resolution issue
+echo "🔄 Fixing axios resolution..."
+if [ -f "node_modules/axios/index.js" ]; then
+    sed -i "s/\.\/lib\/axios.js/\.\/dist\/axios.js/g" node_modules/axios/index.js
+fi
+
+# Production build with specific Vite config
 echo "🏗️ Building production assets..."
-npx vite build
+NODE_ENV=production npx vite build --emptyOutDir
 
 echo "✅ Frontend build complete!"
 echo "📦 Production assets created in: frontend/dockDineStay/dist"
