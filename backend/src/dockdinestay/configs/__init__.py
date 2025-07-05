@@ -5,18 +5,57 @@ import json
 from pathlib import Path
 from dotenv import dotenv_values
 import warnings
+from typing import Union
 
 warnings.filterwarnings(action="ignore")
 
-CONFIGS_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = Path(CONFIGS_DIR).parent.resolve()
 
-# print(f"CONFIGS_DIR -- {CONFIGS_DIR}")
+def get_ancestor_dir(start_path: Union[str, Path], steps: int) -> Path:
+    """
+    Traverses up the directory tree from a given starting path.
 
-__include__ = [".env", "config.json"]
+    This function is useful for finding a project's root directory or other
+    key folders from a deeply nested file.
 
-# Start with explicit path variables
-replacements = {"<ROOT_PATH>": str(PROJECT_ROOT)}
+    Args:
+        start_path: The starting file or directory path. In most cases, you
+                    will pass the `__file__` special variable from the script
+                    where you call this function.
+        steps:      The number of parent directories to go up. Must be a
+                    non-negative integer.
+
+    Returns:
+        A Path object representing the calculated ancestor directory.
+
+    Raises:
+        ValueError: If steps is negative or if the traversal goes beyond
+                    the root of the filesystem.
+    """
+    if not isinstance(steps, int) or steps < 0:
+        raise ValueError("Steps must be a non-negative integer.")
+
+    # Create a Path object and resolve it to an absolute path to handle
+    # symbolic links and relative paths correctly.
+    path = Path(start_path).resolve()
+
+    # If the provided path points to a file, we should start the traversal
+    # from its containing directory.
+    if path.is_file():
+        path = path.parent
+
+    # Traverse up the directory tree the specified number of times
+    for _ in range(steps):
+        # Store the current path before moving to the parent
+        original_path = path
+        path = path.parent
+        # Check if we have gone past the root directory (e.g., '/')
+        if path == original_path:
+            raise ValueError(
+                f"Cannot go up {steps} levels from '{start_path}'. "
+                "Traversal went beyond the filesystem root."
+            )
+
+    return path
 
 
 def _load_yaml_file(filepath: str):
@@ -42,9 +81,8 @@ def _load_json_file(filepath: str):
     return {}
 
 
-def _load_env(filename: str = ".env"):
+def _load_env(filepath: str = ".env"):
     """Loads environment variables from a .env file in the configs directory."""
-    filepath = os.path.join(CONFIGS_DIR, filename)
     if os.path.exists(filepath):
         return dotenv_values(filepath)
     else:
@@ -117,8 +155,8 @@ def _sanitize_name(filename: str) -> str:
     return name
 
 
-def load_file(filename):
-    filepath = os.path.join(CONFIGS_DIR, filename)
+def load_file(filename, DIR):
+    filepath = os.path.join(DIR, filename)
     loaded_data = None
     # Get the name without extension
     config_name = os.path.splitext(filename)[0]
@@ -235,15 +273,19 @@ def _print_tree_recursive(
             print(f"{prefix}{connector}{file_prefix}{path.name}")
 
 
+REPO_ROOT = get_ancestor_dir(__file__, 4)
+CONFIGS_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = Path(CONFIGS_DIR).parent.resolve()
+
+replacements = {"<ROOT_PATH>": str(PROJECT_ROOT)}
+__include__ = [(".env", REPO_ROOT), (CONFIGS_DIR, "config.json")]
+
 # Iterate through all files in the configs directory
-for filename in os.listdir(CONFIGS_DIR):
-    # print(filename)
-    filepath = os.path.join(CONFIGS_DIR, filename)
-    if filename not in __include__ or os.path.isdir(filepath):
-        continue
-    loaded_data, sanitized_config_name = load_file(filename)
+for values in __include__:
+    filename, filedir = values
+    filepath = os.path.join(filedir, filename)
+    loaded_data, sanitized_config_name = load_file(filename, filedir)
     for key, value in replacements.items():
         loaded_data = recursive_replace(loaded_data, old_value=key, new_value=value)
     loaded_data = _resolve_placeholders(loaded_data, loaded_data)
-    # print(sanitized_config_name)
     globals()[sanitized_config_name] = loaded_data
