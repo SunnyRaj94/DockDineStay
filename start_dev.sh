@@ -35,6 +35,9 @@ cd ..
 # --- Frontend Setup ---
 echo ""
 echo "--- Setting up Frontend ---"
+echo "my current directory"
+pwd
+
 echo "Navigating to dockdinestay (frontend) directory..."
 cd frontend/dockdinestay
 
