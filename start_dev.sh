@@ -40,7 +40,7 @@ pwd
 ls
 
 echo "Navigating to dockdinestay (frontend) directory..."
-cd DockDineStay/frontend/dockdinestay
+cd frontend/dockDineStay
 
 echo "Verifying Node.js and npm installation..."
 if ! command -v node &> /dev/null
