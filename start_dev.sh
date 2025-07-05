@@ -88,12 +88,14 @@ npm install --save-exact \
     @types/date-fns@2.6.0 \
     axios@1.5.0 \
     date-fns@2.30.0
+npm install --include=dev && vite build
 
 echo "Installing all frontend dependencies..."
 npm install
 
 echo "Starting React development server..."
-npm run dev
+# npm run dev
+npm run preview
 
 echo ""
 echo "--- Development Environment Setup Complete ---"
