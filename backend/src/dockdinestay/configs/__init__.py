@@ -11,35 +11,10 @@ warnings.filterwarnings(action="ignore")
 
 
 def get_ancestor_dir(start_path: Union[str, Path], steps: int) -> Path:
-    """
-    Traverses up the directory tree from a given starting path.
-
-    This function is useful for finding a project's root directory or other
-    key folders from a deeply nested file.
-
-    Args:
-        start_path: The starting file or directory path. In most cases, you
-                    will pass the `__file__` special variable from the script
-                    where you call this function.
-        steps:      The number of parent directories to go up. Must be a
-                    non-negative integer.
-
-    Returns:
-        A Path object representing the calculated ancestor directory.
-
-    Raises:
-        ValueError: If steps is negative or if the traversal goes beyond
-                    the root of the filesystem.
-    """
     if not isinstance(steps, int) or steps < 0:
         raise ValueError("Steps must be a non-negative integer.")
 
-    # Create a Path object and resolve it to an absolute path to handle
-    # symbolic links and relative paths correctly.
     path = Path(start_path).resolve()
-
-    # If the provided path points to a file, we should start the traversal
-    # from its containing directory.
     if path.is_file():
         path = path.parent
 
@@ -273,6 +248,23 @@ def _print_tree_recursive(
             print(f"{prefix}{connector}{file_prefix}{path.name}")
 
 
+def handle_env_path(filedir, filename):
+    loaded_data = None
+    filepath = os.path.join(filedir, ".env")
+    ENV_VARS = [a for a in os.environ.keys() if a.startswith("ENV_VAR")]
+    if os.path.exists(filepath):
+        loaded_data, sanitized_config_name = load_file(filename, filedir)
+    elif os.environ.get("ENV_FILE_DIR"):
+        loaded_data, sanitized_config_name = load_file(
+            filename, os.environ.get("ENV_FILE_DIR")
+        )
+    elif ENV_VARS:
+        loaded_data = dict(
+            (key.replace("ENV_VAR", ""), os.environ.get(key)) for key in ENV_VARS
+        )
+    return loaded_data
+
+
 REPO_ROOT = get_ancestor_dir(__file__, 4)
 CONFIGS_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = Path(CONFIGS_DIR).parent.resolve()
@@ -280,9 +272,15 @@ PROJECT_ROOT = Path(CONFIGS_DIR).parent.resolve()
 replacements = {"<ROOT_PATH>": str(PROJECT_ROOT)}
 __include__ = [(".env", REPO_ROOT), (CONFIGS_DIR, "config.json")]
 
+
 # Iterate through all files in the configs directory
 for values in __include__:
     filename, filedir = values
+    if filename == ".env":
+        loaded_data = handle_env_path(filedir, filename)
+        if loaded_data is not None:
+            globals()["env"] = loaded_data
+            continue
     filepath = os.path.join(filedir, filename)
     loaded_data, sanitized_config_name = load_file(filename, filedir)
     for key, value in replacements.items():
