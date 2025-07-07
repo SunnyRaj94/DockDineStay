@@ -30,21 +30,41 @@ app = FastAPI(
     },
 )
 
-# --- CORS Configuration ---
-origins = [
-    "http://localhost",
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:8000",
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_origins=[
+        "http://localhost:5173",
+        "https://dockdinestay-uiservice.onrender.com/",
+        "https://dockdinestay-uiservice.onrender.com",
+        "http://localhost",
+        "http://localhost:5173",
+        "http://127.0.0.1",
+        "http://127.0.0.1:5173",
+    ],
+    allow_methods=["POST", "GET", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"],
+    max_age=600,  # Preflight cache duration
 )
+
+
+# Updated CORS configuration
+# origins = [
+#     "http://localhost",
+#     "http://localhost:5173",
+#     "http://127.0.0.1",
+#     "http://127.0.0.1:5173",
+#     "https://your-production-frontend.com",  # Add when you deploy frontend
+# ]
+
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=origins,
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+#     expose_headers=["*"],  # Important for custom headers
+# )
 
 
 # --- Root Endpoint ---
