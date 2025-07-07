@@ -32,19 +32,11 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "https://dockdinestay-uiservice.onrender.com/",
-        "https://dockdinestay-uiservice.onrender.com",
-        "http://localhost",
-        "http://localhost:5173",
-        "http://127.0.0.1",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=["*"],  # TEMPORARY: For testing purposes ONLY
     allow_methods=["POST", "GET", "OPTIONS"],
     allow_headers=["*"],
     expose_headers=["*"],
-    max_age=600,  # Preflight cache duration
+    max_age=600,
 )
 
 
