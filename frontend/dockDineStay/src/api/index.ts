@@ -1,16 +1,13 @@
 import axios from "axios";
-
 import envVars from "../api/envLoader";
 
-console.log(envVars?.API_BASE_URL);
-const API_BASE_URL = envVars?.API_BASE_URL;
-// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: envVars.API_BASE_URL,
   headers: {
-    "Content-Type": "application/json",
+    "Content-Type": "application/x-www-form-urlencoded",
   },
+  withCredentials: false,
+  adapter: axios.defaults.adapter, // Bypass any custom adapters
 });
 
 // Request interceptor to add the JWT token to headers

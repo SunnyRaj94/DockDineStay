@@ -34,7 +34,7 @@ print("Attempting to add CORS middleware with allow_origins=['*']")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # TEMPORARY: For testing purposes ONLY
-    allow_methods=["POST", "GET", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],
     max_age=600,
