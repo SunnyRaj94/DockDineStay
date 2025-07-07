@@ -61,3 +61,5 @@ echo "🎉 Deployment Successful!"
 echo "🔹 Frontend production assets built"
 echo "🔹 Uvicorn running (PID: $UVICORN_PID)"
 echo "🔹 Check logs for detailed output"
+
+# final command -- frontend/dockDineStay/dist

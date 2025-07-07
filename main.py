@@ -1,4 +1,4 @@
-from backend.main import app  # or wherever your FastAPI app is defined
+from backend.main import app
 
 if __name__ == "__main__":
     import uvicorn
