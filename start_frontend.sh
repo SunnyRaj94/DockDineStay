@@ -35,8 +35,10 @@ npm install --save-exact \
     react-router-dom@6.14.2 \
     jwt-decode@3.1.2 \
     vite@4.4.9 \
-    axios@1.5.0
+    axios@1.5.0 \
+    dotenv
 
+npm install --save-dev @types/node
 # Fix jwt-decode import issue
 echo "🔄 Fixing jwt-decode import..."
 sed -i "s/import { jwtDecode } from \"jwt-decode\"/import jwtDecode from \"jwt-decode\"/g" src/context/AuthContext.tsx
@@ -56,7 +58,6 @@ echo "📦 Production assets created in: frontend/dockDineStay/dist"
 
 echo ""
 echo "🎉 Deployment Successful!"
-echo "🔹 Backend: http://localhost:8000"
 echo "🔹 Frontend production assets built"
 echo "🔹 Uvicorn running (PID: $UVICORN_PID)"
 echo "🔹 Check logs for detailed output"

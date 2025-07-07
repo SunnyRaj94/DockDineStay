@@ -2,12 +2,15 @@
 import axios from "axios";
 import { format } from "date-fns"; // For better date formatting
 import React, { useCallback, useEffect, useState } from "react";
+import envVars from "../api/envLoader";
 import LoadingSpinner from "../components/LoadingSpinner";
 import Modal from "../components/Modal";
 import { useAuth } from "../context/AuthContext";
 import styles from "./AdminHotelRoomsPage.module.css";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+console.log(envVars?.API_BASE_URL);
+const API_BASE_URL = envVars?.API_BASE_URL;
+// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Define the HotelRoom type based on your backend Pydantic model
 interface HotelRoom {

@@ -1,19 +1,22 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import envVars from "../api/envLoader";
 
+console.log(envVars?.API_BASE_URL);
+const API_BASE_URL = envVars?.API_BASE_URL;
+// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 // Request interceptor to add the JWT token to headers
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('accessToken'); // Or sessionStorage
+    const token = localStorage.getItem("accessToken"); // Or sessionStorage
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -30,13 +33,19 @@ api.interceptors.response.use(
   (error) => {
     // If the error is 401 Unauthorized and not from the /token endpoint itself,
     // it likely means the token is expired or invalid.
-    if (error.response && error.response.status === 401 && error.config.url !== '/token') {
-      console.error('Unauthorized request. Token might be expired or invalid. Redirecting to login...');
+    if (
+      error.response &&
+      error.response.status === 401 &&
+      error.config.url !== "/token"
+    ) {
+      console.error(
+        "Unauthorized request. Token might be expired or invalid. Redirecting to login..."
+      );
       // Clear token and redirect to login
-      localStorage.removeItem('accessToken');
+      localStorage.removeItem("accessToken");
       // Using window.location for simplicity, but in a real app,
       // you might use a router navigation for smoother UX.
-      window.location.href = '/login'; 
+      window.location.href = "/login";
     }
     return Promise.reject(error);
   }
