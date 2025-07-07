@@ -69,6 +69,120 @@ It provides a seamless experience for both administrators/staff and customers, w
 
 ---
 
+## 🗂️ Folder Structure (Simplified)
+
+```plaintext
+├── assets/                  # Images, UI assets
+├── backend/
+│   └── src/dockdinestay/
+│       ├── auth/            # JWT, OAuth, login utils
+│       ├── configs/         # Config files (JSON/env)
+│       ├── db/              # MongoDB operations (CRUD)
+│       └── routers/         # FastAPI route definitions
+├── frontend/
+│   └── dockDineStay/
+│       └── src/
+│           ├── api/         # Axios API services
+│           ├── components/  # Reusable UI components
+│           ├── context/     # Auth context provider
+│           ├── pages/       # Route pages (Login, Admin, etc.)
+````
+
+## 🔧 Backend Sample (FastAPI)
+
+### 🚦 Routing Example: `routes/rooms.py`
+
+```python
+@router.get("/rooms", response_model=List[RoomOut])
+async def get_rooms():
+    rooms = await room_collection.find().to_list(100)
+    return rooms
+
+@router.post("/rooms", response_model=RoomOut)
+async def create_room(room: RoomIn):
+    result = await room_collection.insert_one(room.dict())
+    return room
+````
+
+### 📄 Pydantic Models Example: `models/room.py`
+
+```python
+from pydantic import BaseModel
+from typing import Optional
+
+class RoomIn(BaseModel):
+    number: str
+    room_type: str
+    price: float
+    status: str
+    features: Optional[list[str]] = []
+    image_url: Optional[str] = None
+
+class RoomOut(RoomIn):
+    id: str
+```
+
+---
+
+## 💻 Backend Docs 
+
+### 📸 Api Docs on Ui
+
+* 🧾 **backend**
+  * Docks in ui
+  * deployed_uri/docs -> example -- http://127.0.0.1:8000/docs
+
+  <img src="assets/frontend-login.png">
+
+
+## 💻 Frontend Pages (React)
+
+### 📸 UI Previews
+
+* 🧾 **Login Page**
+
+  * Email + password
+  * Redirect to dashboard based on role
+
+  <img src="assets/frontend-login.png">
+
+* 🛏️ **Hotel Room Listing**
+
+  * Responsive cards showing room type, price, and status
+  * Booking button for authenticated users
+
+  <img src="assets/frontend-rooms.png">
+
+* 📅 **Booking Page** (Added in hotel rooms app)
+
+  * Form to select room and date
+  * Availability validation via API
+
+* 🍴 **Cafeteria Page** (yet to integrate)
+
+  * Table status (occupied/free)
+  * Menu browsing and ordering
+
+* 🚤 **Boat Rentals** (yet to integrate)
+
+  * List of available boats with booking form
+
+📌 *Use `src/pages/` for page-based routing via `react-router-dom`.*
+
+---
+
+## 🔐 Authentication Flow
+
+1. User logs in → JWT stored in localStorage
+2. `AuthContext` holds user session & role
+3. Axios sends token in headers:
+
+   ```ts
+   axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+   ```
+
+---
+
 ## ⚙️ Setup and Installation
 
 ### 🔹 Prerequisites
