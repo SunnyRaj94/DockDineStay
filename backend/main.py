@@ -29,6 +29,7 @@ app = FastAPI(
         }
     },
 )
+print("Attempting to add CORS middleware with allow_origins=['*']")
 
 app.add_middleware(
     CORSMiddleware,
