@@ -41,3 +41,6 @@ echo "✅ Uvicorn running (PID: $UVICORN_PID) - http://localhost:8000"
 echo "📝 Logs: backend/uvicorn.log"
 
 cd ..
+
+## final executalble command
+# gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app
